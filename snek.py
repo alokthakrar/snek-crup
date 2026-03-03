@@ -150,7 +150,12 @@ def game_loop(stdscr):
 
         game.set_direction(key)
         if not game.do_step():
-            print("Game over!")
+            stdscr.clear()
+            stdscr.addstr(0, 0, f"Game Over! Final Score: {game.score}")
+            stdscr.addstr(1, 0, "Press any key to exit...")
+            stdscr.refresh()
+            stdscr.nodelay(0)
+            stdscr.getch()
             return
 
         stdscr.clear()
@@ -159,6 +164,9 @@ def game_loop(stdscr):
         for y, row in enumerate(game.grid()):
             for x, char in enumerate(row):
                 stdscr.addch(y, x, ord(str(char)))
+
+        # Draw score below the grid
+        stdscr.addstr(16, 0, f"Score: {game.score} | Controls: WASD | Length: {len(game.snake)}")
 
         # Refresh screen
         stdscr.refresh()
