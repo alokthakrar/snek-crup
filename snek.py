@@ -17,19 +17,17 @@ class SnakeGame:
         self.width = width
         self.height = height
 
-        # Initialize snake in center, length 3, moving right
+        # snake starts in center, length 3
         center_x = width // 2
         center_y = height // 2
         self.snake = [(center_x, center_y), (center_x - 1, center_y), (center_x - 2, center_y)]
 
-        # Direction: (dx, dy) - initially moving right
+        # moving right initially
         self.direction = (1, 0)
         self.next_direction = (1, 0)
 
         self.game_over = False
         self.score = 0
-
-        # Spawn initial food
         self.food = self._spawn_food()
 
     def grid(self) -> list[list[str]]:
@@ -37,10 +35,10 @@ class SnakeGame:
         Handles the display of the grid
         Should return a 2D list of characters
         """
-        # Create empty grid
+        # make empty grid
         grid = [[' ' for _ in range(self.width)] for _ in range(self.height)]
 
-        # Draw walls
+        # walls
         for x in range(self.width):
             grid[0][x] = '#'
             grid[self.height - 1][x] = '#'
@@ -48,14 +46,14 @@ class SnakeGame:
             grid[y][0] = '#'
             grid[y][self.width - 1] = '#'
 
-        # Draw snake
+        # draw snake
         for i, (x, y) in enumerate(self.snake):
             if i == 0:
-                grid[y][x] = 'O'  # Head
+                grid[y][x] = 'O'
             else:
-                grid[y][x] = 'o'  # Body
+                grid[y][x] = 'o'
 
-        # Draw food
+        # food
         if self.food:
             grid[self.food[1]][self.food[0]] = '*'
 
@@ -69,17 +67,17 @@ class SnakeGame:
         if key_input is None:
             return
 
-        # Map keys to directions and prevent 180-degree turns
+        # map wasd to directions
         direction_map = {
-            'w': (0, -1),  # Up
-            's': (0, 1),   # Down
-            'a': (-1, 0),  # Left
-            'd': (1, 0)    # Right
+            'w': (0, -1),
+            's': (0, 1),
+            'a': (-1, 0),
+            'd': (1, 0)
         }
 
         if key_input in direction_map:
             new_dir = direction_map[key_input]
-            # Prevent moving in opposite direction
+            # dont let snake reverse into itself
             if (new_dir[0] + self.direction[0] != 0 or
                 new_dir[1] + self.direction[1] != 0):
                 self.next_direction = new_dir
@@ -92,39 +90,36 @@ class SnakeGame:
         if self.game_over:
             return False
 
-        # Update direction
         self.direction = self.next_direction
 
-        # Calculate new head position
+        # move head
         head_x, head_y = self.snake[0]
         new_head = (head_x + self.direction[0], head_y + self.direction[1])
 
-        # Check wall collision
+        # hit wall
         if (new_head[0] <= 0 or new_head[0] >= self.width - 1 or
             new_head[1] <= 0 or new_head[1] >= self.height - 1):
             self.game_over = True
             return False
 
-        # Check self collision
+        # hit self
         if new_head in self.snake:
             self.game_over = True
             return False
 
-        # Move snake
         self.snake.insert(0, new_head)
 
-        # Check if food is eaten
+        # check if ate food
         if new_head == self.food:
             self.score += 1
             self.food = self._spawn_food()
         else:
-            # Remove tail if no food eaten
             self.snake.pop()
 
         return True
 
     def _spawn_food(self) -> tuple[int, int]:
-        """Spawn food at a random empty location"""
+        """spawn food randomly"""
         while True:
             x = random.randint(1, self.width - 2)
             y = random.randint(1, self.height - 2)
@@ -151,8 +146,8 @@ def game_loop(stdscr):
         game.set_direction(key)
         if not game.do_step():
             stdscr.clear()
-            stdscr.addstr(0, 0, f"Game Over! Final Score: {game.score}")
-            stdscr.addstr(1, 0, "Press any key to exit...")
+            stdscr.addstr(0, 0, f"game over - score: {game.score}")
+            stdscr.addstr(1, 0, "press any key")
             stdscr.refresh()
             stdscr.nodelay(0)
             stdscr.getch()
@@ -160,15 +155,14 @@ def game_loop(stdscr):
 
         stdscr.clear()
 
-        # Draw grid
+        # draw grid
         for y, row in enumerate(game.grid()):
             for x, char in enumerate(row):
                 stdscr.addch(y, x, ord(str(char)))
 
-        # Draw score below the grid
-        stdscr.addstr(16, 0, f"Score: {game.score} | Controls: WASD | Length: {len(game.snake)}")
+        # show score
+        stdscr.addstr(16, 0, f"score: {game.score} | wasd | length: {len(game.snake)}")
 
-        # Refresh screen
         stdscr.refresh()
 
 
