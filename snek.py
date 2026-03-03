@@ -1,4 +1,5 @@
 import curses
+import random
 from typing import Optional
 
 
@@ -26,6 +27,10 @@ class SnakeGame:
         self.next_direction = (1, 0)
 
         self.game_over = False
+        self.score = 0
+
+        # Spawn initial food
+        self.food = self._spawn_food()
 
     def grid(self) -> list[list[str]]:
         """
@@ -49,6 +54,10 @@ class SnakeGame:
                 grid[y][x] = 'O'  # Head
             else:
                 grid[y][x] = 'o'  # Body
+
+        # Draw food
+        if self.food:
+            grid[self.food[1]][self.food[0]] = '*'
 
         return grid
 
@@ -101,11 +110,26 @@ class SnakeGame:
             self.game_over = True
             return False
 
-        # Move snake (add new head, remove tail)
+        # Move snake
         self.snake.insert(0, new_head)
-        self.snake.pop()
+
+        # Check if food is eaten
+        if new_head == self.food:
+            self.score += 1
+            self.food = self._spawn_food()
+        else:
+            # Remove tail if no food eaten
+            self.snake.pop()
 
         return True
+
+    def _spawn_food(self) -> tuple[int, int]:
+        """Spawn food at a random empty location"""
+        while True:
+            x = random.randint(1, self.width - 2)
+            y = random.randint(1, self.height - 2)
+            if (x, y) not in self.snake:
+                return (x, y)
 
 
 def game_loop(stdscr):
